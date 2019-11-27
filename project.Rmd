@@ -1,0 +1,262 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "from sklearn.cluster import KMeans"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data=pd.read_table(\"./Data_Extract_From_World_Development_Indicators_2/f55a1b6c-6a50-4ee3-bfc3-c775ea8759cc_Data.txt\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data=data.drop(columns=[\"Time\",\"Time Code\",\"Country Name\",\"Number of people spending more than 10% of household consumption or income on out-of-pocket health care expenditure [SH.UHC.OOPC.10.TO]\",\"Total debt service (% of GNI) [DT.TDS.DECT.GN.ZS]\",\"Bank capital to assets ratio (%) [FB.BNK.CAPA.ZS]\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data=data.dropna(axis='rows')\n",
+    "data.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.index=data[\"Country Code\"]\n",
+    "data=data.drop(columns=[\"Country Code\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "variablesNames=[\"electricity\",\n",
+    "\"agricultural\",\n",
+    "\"secondary_pupils\",\t\n",
+    "\"GDP_p_c\",\n",
+    "\"rural_population\",\n",
+    "\"population_density\",\n",
+    "\"life_expectancy\",\n",
+    "\"enrollment_rate\",\n",
+    "\"out_of_school\",\n",
+    "\"pupil_teacher_ratio\",\n",
+    "\"gross_intake\",\n",
+    "\"GPI\",\n",
+    "\"unemployment\",\n",
+    "\"population\",\n",
+    "\"proportion_women\",\n",
+    "\"GDP_growth\"]\n",
+    "data.columns=variablesNames"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "corOfData=data.corr()\n",
+    "corOfData"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for i, row in enumerate(corOfData.values):\n",
+    "    for j, column in enumerate(row):\n",
+    "        if i>j and (corOfData.values[i][j]>0.0 or corOfData.values[i][j]<-0.0) and (corOfData.index[i] != corOfData.index[j]) :\n",
+    "            print(corOfData.index[i],\" - \",corOfData.index[j],\" : \", corOfData.values[i][j])    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[\"secondary_pupils\"]=data[\"secondary_pupils\"]/data[\"population\"]*10\n",
+    "data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[\"GDP_p_c\"]\n",
+    "max(data[\"GDP_p_c\"])\n",
+    "data.max() "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data['GDP_p_c'].max()\n",
+    "data[data['GDP_p_c']==data['GDP_p_c'].max()]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[\"GDP_p_c\"]=data[\"GDP_p_c\"]/data['GDP_p_c'].max()*100\n",
+    "data[\"population_density\"]=data[\"population_density\"]/data['population_density'].max()*100"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "corOfData=data.corr()\n",
+    "corOfData"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from seaborn import clustermap"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "clustermap(corOfData,annot=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data=data.drop(columns=[\"out_of_school\",\"electricity\",\"agricultural\",\"GDP_growth\",\"secondary_pupils\",\"population\",\"proportion_women\",\"rural_population\",\"pupil_teacher_ratio\",\"population_density\"])\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "corOfData=data.corr()\n",
+    "corOfData"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "clustermap(corOfData,annot=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.4"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
